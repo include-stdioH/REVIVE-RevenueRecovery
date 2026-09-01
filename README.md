@@ -1,5 +1,5 @@
 # REVIVE-RevenueRecovery
-Repository for https://replit.com/@shrikrithiloges/REVIVE-Revenue-Recovery-1
+Repository for [https://replit.com/@shrikrithiloges/REVIVE-Revenue-Recovery-1](https://revive-revenue-recovery-1--shrikrithiloges.replit.app)
 # REVIVE — AI Revenue Recovery Control Room
 
 > **Detect revenue at risk. Decide intelligently. Recover safely.**
