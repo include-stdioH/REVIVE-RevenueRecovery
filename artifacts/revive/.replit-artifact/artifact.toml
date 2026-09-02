@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "REVIVE Revenue Recovery"
+description = "A fintech control room that detects revenue at risk, explains AI recovery decisions, runs bounded simulations, and measures verified recovery for operations teams."
+version = "1.0.0"
+id = "artifacts/revive"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21603
+
+[services.development]
+run = "pnpm --filter @workspace/revive run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/revive", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/revive/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21603"
+BASE_PATH = "/"
