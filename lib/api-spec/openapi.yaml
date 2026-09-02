@@ -1,0 +1,532 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: REVIVE AI Revenue Recovery Control Room API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: revive
+    description: Revenue recovery operations
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /dashboard:
+    get:
+      operationId: getDashboard
+      tags: [revive]
+      summary: Get dashboard summary
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dashboard"
+  /opportunities:
+    get:
+      operationId: getOpportunities
+      tags: [revive]
+      summary: List revenue opportunities
+      responses:
+        "200":
+          description: Revenue opportunities
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Opportunity"
+  /opportunities/{id}:
+    get:
+      operationId: getOpportunity
+      tags: [revive]
+      summary: Get opportunity details
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200":
+          description: Opportunity detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpportunityDetail"
+        "404":
+          description: Opportunity not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /customers:
+    get:
+      operationId: getCustomers
+      tags: [revive]
+      summary: List customers
+      responses:
+        "200":
+          description: Customers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Customer"
+  /customers/{id}:
+    get:
+      operationId: getCustomer
+      tags: [revive]
+      summary: Get customer detail
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200":
+          description: Customer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+  /workflows:
+    get:
+      operationId: getWorkflows
+      tags: [revive]
+      summary: List recovery workflows
+      responses:
+        "200":
+          description: Workflows
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Workflow"
+  /audit:
+    get:
+      operationId: getAudit
+      tags: [revive]
+      summary: List audit events
+      responses:
+        "200":
+          description: Audit events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AuditEvent"
+  /analytics:
+    get:
+      operationId: getAnalytics
+      tags: [revive]
+      summary: Get recovery analytics
+      responses:
+        "200":
+          description: Analytics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Analytics"
+  /guardrails:
+    get:
+      operationId: getGuardrails
+      tags: [revive]
+      summary: Get active guardrails
+      responses:
+        "200":
+          description: Guardrails
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Guardrails"
+    put:
+      operationId: updateGuardrails
+      tags: [revive]
+      summary: Update active guardrails
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GuardrailsInput"
+      responses:
+        "200":
+          description: Updated guardrails
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Guardrails"
+  /search:
+    get:
+      operationId: search
+      tags: [revive]
+      summary: Search across recovery records
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SearchResult"
+  /agent/run/{opportunityId}:
+    post:
+      operationId: runAgent
+      tags: [revive]
+      summary: Run the bounded recovery agent
+      parameters:
+        - name: opportunityId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Agent run result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RunResult"
+  /demo/{scenario}:
+    post:
+      operationId: runDemo
+      tags: [revive]
+      summary: Run a simulated recovery scenario
+      parameters:
+        - name: scenario
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [payment-degradation, checkout, subscription, receivables, mandate, hinglish, promise-to-pay, full]
+      responses:
+        "200":
+          description: Simulation result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RunResult"
+components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+    Dashboard:
+      type: object
+      required: [metrics, trend, workflowBreakdown, activity, topOpportunities, intelligence, scorecard]
+      properties:
+        metrics:
+          $ref: "#/components/schemas/Metrics"
+        trend:
+          type: array
+          items:
+            $ref: "#/components/schemas/TrendPoint"
+        workflowBreakdown:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkflowBreakdown"
+        activity:
+          type: array
+          items:
+            $ref: "#/components/schemas/Activity"
+        topOpportunities:
+          type: array
+          items:
+            $ref: "#/components/schemas/Opportunity"
+        intelligence:
+          $ref: "#/components/schemas/Intelligence"
+        scorecard:
+          $ref: "#/components/schemas/Scorecard"
+    Metrics:
+      type: object
+      required: [revenueAtRisk, revenueRecovered, recoveryRate, activeOpportunities, successfulInterventions, preventedLoss]
+      properties:
+        revenueAtRisk: { type: number }
+        revenueRecovered: { type: number }
+        recoveryRate: { type: number }
+        activeOpportunities: { type: number }
+        successfulInterventions: { type: number }
+        preventedLoss: { type: number }
+    TrendPoint:
+      type: object
+      required: [label, atRisk, recovered, remaining]
+      properties:
+        label: { type: string }
+        atRisk: { type: number }
+        recovered: { type: number }
+        remaining: { type: number }
+    WorkflowBreakdown:
+      type: object
+      required: [label, amount, count, color]
+      properties:
+        label: { type: string }
+        amount: { type: number }
+        count: { type: number }
+        color: { type: string }
+    Activity:
+      type: object
+      required: [id, title, detail, stage, timestamp, tone]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        detail: { type: string }
+        stage: { type: string }
+        timestamp: { type: string }
+        tone: { type: string }
+    Opportunity:
+      type: object
+      required: [id, customer, type, amountAtRisk, riskScore, urgency, confidence, rootCause, recommendedAction, status, createdAt, lastAction, nextAction, stoppingRule]
+      properties:
+        id: { type: string }
+        customer: { type: string }
+        customerId: { type: string }
+        type: { type: string }
+        amountAtRisk: { type: number }
+        riskScore: { type: number }
+        urgency: { type: string }
+        confidence: { type: number }
+        rootCause: { type: string }
+        recommendedAction: { type: string }
+        status: { type: string }
+        createdAt: { type: string }
+        lastAction: { type: string }
+        nextAction: { type: string }
+        stoppingRule: { type: string }
+        recoveryProbability: { type: number }
+    OpportunityDetail:
+      allOf:
+        - $ref: "#/components/schemas/Opportunity"
+        - type: object
+          required: [whyAtRisk, reasoning, timeline, agentActions]
+          properties:
+            whyAtRisk: { type: string }
+            reasoning: { type: string }
+            timeline:
+              type: array
+              items:
+                $ref: "#/components/schemas/TimelineEvent"
+            agentActions:
+              type: array
+              items:
+                $ref: "#/components/schemas/AgentAction"
+    TimelineEvent:
+      type: object
+      required: [id, title, detail, timestamp, kind]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        detail: { type: string }
+        timestamp: { type: string }
+        kind: { type: string }
+    AgentAction:
+      type: object
+      required: [id, action, stage, result, timestamp, status]
+      properties:
+        id: { type: string }
+        action: { type: string }
+        stage: { type: string }
+        result: { type: string }
+        timestamp: { type: string }
+        status: { type: string }
+    Customer:
+      type: object
+      required: [id, name, company, email, segment, lifetimeValue, health, lastPayment, openRisk]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        company: { type: string }
+        email: { type: string }
+        segment: { type: string }
+        lifetimeValue: { type: number }
+        health: { type: string }
+        lastPayment: { type: string }
+        openRisk: { type: number }
+    Workflow:
+      type: object
+      required: [id, name, category, status, activeCount, recovered, successRate, lastRun, stages]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        category: { type: string }
+        status: { type: string }
+        activeCount: { type: number }
+        recovered: { type: number }
+        successRate: { type: number }
+        lastRun: { type: string }
+        stages:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkflowStage"
+    WorkflowStage:
+      type: object
+      required: [name, status, result]
+      properties:
+        name: { type: string }
+        status: { type: string }
+        result: { type: string }
+        timestamp: { type: string }
+    AuditEvent:
+      type: object
+      required: [id, timestamp, opportunity, stage, action, actor, result, confidence, status]
+      properties:
+        id: { type: string }
+        timestamp: { type: string }
+        opportunity: { type: string }
+        stage: { type: string }
+        action: { type: string }
+        actor: { type: string }
+        result: { type: string }
+        confidence: { type: number }
+        status: { type: string }
+    Analytics:
+      type: object
+      required: [metrics, recoveryByWorkflow, recoveryByIntervention, recoveryByReason, segments, funnel, avgRecoveryTime]
+      properties:
+        metrics: { $ref: "#/components/schemas/Metrics" }
+        recoveryByWorkflow:
+          type: array
+          items:
+            $ref: "#/components/schemas/AnalyticsItem"
+        recoveryByIntervention:
+          type: array
+          items:
+            $ref: "#/components/schemas/AnalyticsItem"
+        recoveryByReason:
+          type: array
+          items:
+            $ref: "#/components/schemas/AnalyticsItem"
+        segments:
+          type: array
+          items:
+            $ref: "#/components/schemas/AnalyticsItem"
+        funnel:
+          type: array
+          items:
+            $ref: "#/components/schemas/FunnelItem"
+        avgRecoveryTime: { type: string }
+    AnalyticsItem:
+      type: object
+      required: [label, value, count]
+      properties:
+        label: { type: string }
+        value: { type: number }
+        count: { type: number }
+    FunnelItem:
+      type: object
+      required: [label, value, color]
+      properties:
+        label: { type: string }
+        value: { type: number }
+        color: { type: string }
+    Guardrails:
+      type: object
+      required: [maxRetries, minRetryIntervalHours, maxContactsPerDay, discountApprovalThreshold, highValueThreshold, lowConfidenceThreshold, autoApprove, stopAfterSuccess, stopAfterOptOut]
+      properties:
+        maxRetries: { type: number }
+        minRetryIntervalHours: { type: number }
+        maxContactsPerDay: { type: number }
+        discountApprovalThreshold: { type: number }
+        highValueThreshold: { type: number }
+        lowConfidenceThreshold: { type: number }
+        autoApprove: { type: boolean }
+        stopAfterSuccess: { type: boolean }
+        stopAfterOptOut: { type: boolean }
+    GuardrailsInput:
+      type: object
+      properties:
+        maxRetries: { type: number }
+        minRetryIntervalHours: { type: number }
+        maxContactsPerDay: { type: number }
+        discountApprovalThreshold: { type: number }
+        highValueThreshold: { type: number }
+        lowConfidenceThreshold: { type: number }
+        autoApprove: { type: boolean }
+        stopAfterSuccess: { type: boolean }
+        stopAfterOptOut: { type: boolean }
+    Intelligence:
+      type: object
+      required: [recovered, preventedLoss, bestIntervention, recoveryProbability, agentConfidence]
+      properties:
+        recovered: { type: number }
+        preventedLoss: { type: number }
+        bestIntervention: { type: string }
+        recoveryProbability: { type: number }
+        agentConfidence: { type: number }
+    Scorecard:
+      type: object
+      required: [detected, recommendationsAccepted, successfulRecoveries, recoveryRate, escalationRate, avgConfidence, avgRecoveryTime]
+      properties:
+        detected: { type: number }
+        recommendationsAccepted: { type: number }
+        successfulRecoveries: { type: number }
+        recoveryRate: { type: number }
+        escalationRate: { type: number }
+        avgConfidence: { type: number }
+        avgRecoveryTime: { type: string }
+    SearchResult:
+      type: object
+      required: [id, title, subtitle, kind]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        subtitle: { type: string }
+        kind: { type: string }
+    RunResult:
+      type: object
+      required: [scenario, title, message, amountAtRisk, expectedRecovery, actualRecovery, status, stages, auditEvents, opportunity]
+      properties:
+        scenario: { type: string }
+        title: { type: string }
+        message: { type: string }
+        amountAtRisk: { type: number }
+        expectedRecovery: { type: number }
+        actualRecovery: { type: number }
+        status: { type: string }
+        stages:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkflowStage"
+        auditEvents:
+          type: array
+          items:
+            $ref: "#/components/schemas/AuditEvent"
+        opportunity:
+          $ref: "#/components/schemas/Opportunity"
+
