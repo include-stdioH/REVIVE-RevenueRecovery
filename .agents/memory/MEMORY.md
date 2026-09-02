@@ -1,0 +1,1 @@
+- [OpenAPI integer compatibility](openapi-zod-integer.md) — keep generated Zod calls compatible with the installed runtime major version.
