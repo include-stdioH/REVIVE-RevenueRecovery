@@ -11,9 +11,6 @@ Instead of treating revenue loss as a single payment problem, REVIVE provides a 
 **Try REVIVE:**
 https://revive-revenue-recovery-1--shrikrithiloges.replit.app/
 
-**Source Code:**
-https://github.com/include-stdioH/REVIVE-RevenueRecovery
-
 > **Demo note:** REVIVE currently operates in simulation mode using fictional INR data. No real customer, payment, or financial transaction is affected.
 
 ---
